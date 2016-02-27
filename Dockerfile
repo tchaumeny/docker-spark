@@ -1,7 +1,5 @@
 FROM ubuntu
 
-ENV MINOR_SCALA_VERSION 2.11
-ENV SCALA_VERSION 2.11.7
 ENV SPARK_VERSION 1.6.0
 
 # Install Oracle Java 8
@@ -12,11 +10,6 @@ RUN sudo apt-get -y update
 RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 RUN sudo apt-get -y install oracle-java8-installer
 
-# Install Scala
-RUN wget http://www.scala-lang.org/files/archive/scala-$SCALA_VERSION.deb
-RUN sudo dpkg -i scala-$SCALA_VERSION.deb
-RUN rm scala-$SCALA_VERSION.deb
-
 # Install Python
 RUN sudo apt-get install -y python2.7 python2.7-dev
 
@@ -24,12 +17,12 @@ RUN sudo apt-get install -y python2.7 python2.7-dev
 RUN sudo add-apt-repository -y ppa:andrei-pozolotin/maven3
 RUN sudo apt-get -y update
 RUN sudo apt-get -y install maven3
-ENV MAVEN_OPTS -Xmx2g -XX:MaxPermSize=512M -XX:ReservedCodeCacheSize=512m
+ENV MAVEN_OPTS -Xmx4g -Xms1g -noverify
 
 # Install Spark
 RUN wget http://apache.websitebeheerjd.nl/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION.tgz
 RUN tar -zxf spark-$SPARK_VERSION.tgz
-RUN cd spark-$SPARK_VERSION && ./dev/change-scala-version.sh $MINOR_SCALA_VERSION && mvn -Pyarn -Phadoop-2.4 -Dscala-2.11 -DskipTests clean package
+RUN cd spark-$SPARK_VERSION && mvn -Pyarn -Phadoop-2.4 -Dhadoop.version=2.4.0 -DskipTests clean package
 RUN rm spark-$SPARK_VERSION.tgz
 
 # Master port to connect to cluster
